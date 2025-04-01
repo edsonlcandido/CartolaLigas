@@ -1,0 +1,42 @@
+﻿@page "/"
+@using CartolaLigas.Services
+@inject CustomHttpClientProvider httpClient
+@inject NavigationManager NavigationManager
+@inject LigasService ligasService
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+<div class="alert alert-warning" role="alert">
+	Before authentication will function correctly, you must configure your provider details in <code>Program.cs</code>
+</div>
+<div>
+	Criar liga <a href="#" @onclick="CreateLeague">Criar</a>
+</div>
+<div>Listas ligas <a href="#" @onclick="ListarLigas">Listar</a></div>
+<div>
+	@if (ligas != null)
+	{
+		<ul>
+			@foreach (var liga in ligas)
+			{
+				<li>@liga.name</li>
+			}
+		</ul>		
+	}
+</div>
+Welcome to your new app.
+
+@code{
+	private List<Liga> ligas;
+	private async Task CreateLeague()
+	{
+		await ligasService.CreateAsync("e35894k16k3p7jt","LigaTeste3","ligatest3");
+	}
+	private async Task ListarLigas()
+	{
+		var Ligas = await ligasService.ListarAsync("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJfcGJfdXNlcnNfYXV0aF8iLCJleHAiOjE3NDQwNzA0MDgsImlkIjoiZTM1ODk0azE2azNwN2p0IiwicmVmcmVzaGFibGUiOnRydWUsInR5cGUiOiJhdXRoIn0.cpMyfPkPZy8bkA1VhzK3e2P-2vjO5RaMnF_Tm0cvj9M");
+		ligas = Ligas;
+	}
+
+}

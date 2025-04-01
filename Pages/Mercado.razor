@@ -1,0 +1,13 @@
+﻿@page "/mercado"
+@inject CartolaService CartolaService
+
+<h3>Mercado</h3>
+
+
+@code {
+	private Object mercado;
+	protected override async Task OnInitializedAsync()
+	{
+		mercado = await CartolaService.GetMercado();
+	}
+}
