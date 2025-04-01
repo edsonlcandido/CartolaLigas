@@ -11,12 +11,12 @@ namespace CartolaLigas.Services
         public LigasService(CustomHttpClientProvider httpClient)
         {
             _httpClient = httpClient;
+            _httpClient.BaseAddress = new Uri("https://api.ligas.ehtudo.app/");
         }
 
         public async Task CreateAsync(string userId, string name, string slug)
         {
             _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.BaseAddress = new Uri("https://eh-tudo-api-ligas.aiyfgd.easypanel.host/");
             _httpClient.DefaultRequestHeaders.Add("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJfcGJfdXNlcnNfYXV0aF8iLCJleHAiOjE3NDQwNzA0MDgsImlkIjoiZTM1ODk0azE2azNwN2p0IiwicmVmcmVzaGFibGUiOnRydWUsInR5cGUiOiJhdXRoIn0.cpMyfPkPZy8bkA1VhzK3e2P-2vjO5RaMnF_Tm0cvj9M");
 
             var response = await _httpClient.PostAsJsonAsync(
@@ -35,7 +35,6 @@ namespace CartolaLigas.Services
         public async Task<List<Liga>> ListarAsync(string token)
         {
             _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.BaseAddress = new Uri("https://eh-tudo-api-ligas.aiyfgd.easypanel.host/");
             _httpClient.DefaultRequestHeaders.Add("Authorization", token);
             var response = await _httpClient.GetFromJsonAsync<ListarLigas>("api/collections/ligas/records");
             return response.items;

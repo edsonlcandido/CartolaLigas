@@ -8,6 +8,10 @@
 	private Object mercado;
 	protected override async Task OnInitializedAsync()
 	{
-		mercado = await CartolaService.GetMercado();
+		if (mercado != null)
+		{
+			mercado = await CartolaService.GetMercado();
+		}
+		
 	}
 }
