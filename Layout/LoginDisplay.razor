@@ -5,11 +5,11 @@
 
 <AuthorizeView>
     <Authorized>
-        Hello, @context.User.Identity?.Name!
+        Olá, @context.User.Identity?.Name!
         <button class="nav-link btn btn-link" @onclick="BeginLogOut">Log out</button>
     </Authorized>
     <NotAuthorized>
-        <a href="/login">Log in</a>
+        <NavLink href="/login">Log in</NavLink>
     </NotAuthorized>
 </AuthorizeView>
 
@@ -17,6 +17,6 @@
     public void BeginLogOut()
     {
         ((CustomAuthenticationStateProvider)AuthenticationStateProvider).NotifyUserLogout();
-        Navigation.NavigateTo("/logout");
+        Navigation.NavigateTo("/", true);
     }
 }

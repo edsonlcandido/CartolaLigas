@@ -5,27 +5,8 @@
 @inject LigasService ligasService
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-<div class="alert alert-warning" role="alert">
-	Before authentication will function correctly, you must configure your provider details in <code>Program.cs</code>
-</div>
-<div>
-	Criar liga <a href="#" @onclick="CreateLeague">Criar</a>
-</div>
-<div>Listas ligas <a href="#" @onclick="ListarLigas">Listar</a></div>
-<div>
-	@if (ligas != null)
-	{
-		<ul>
-			@foreach (var liga in ligas)
-			{
-				<li>@liga.name</li>
-			}
-		</ul>		
-	}
-</div>
-Welcome to your new app.
+<h1>Ligas cartola</h1>
+<p>Cria ligas coms seus amigos e compatilhe a zueira, sempre que mitar.</p>
 
 @code{
 	private List<Liga> ligas;

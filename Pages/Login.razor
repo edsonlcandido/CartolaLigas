@@ -20,7 +20,8 @@
         var success = await AuthService.Login(loginModel.Username, loginModel.Password);
         if (success)
         {
-            Navigation.NavigateTo("/");
+            //adiciona 
+            Navigation.NavigateTo("/",true);
         }
         else
         {
