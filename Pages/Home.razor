@@ -7,17 +7,9 @@
 
 <h1>Ligas cartola</h1>
 <p>Cria ligas coms seus amigos e compatilhe a zueira, sempre que mitar.</p>
+<p>Crie sua primeira liga e compartilhe com os amigos. <NavLink href="/register">Cadastre-se</NavLink></p>
 
 @code{
-	private List<Liga> ligas;
-	private async Task CreateLeague()
-	{
-		await ligasService.CreateAsync("e35894k16k3p7jt","LigaTeste3","ligatest3");
-	}
-	private async Task ListarLigas()
-	{
-		var Ligas = await ligasService.ListarAsync("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJfcGJfdXNlcnNfYXV0aF8iLCJleHAiOjE3NDQwNzA0MDgsImlkIjoiZTM1ODk0azE2azNwN2p0IiwicmVmcmVzaGFibGUiOnRydWUsInR5cGUiOiJhdXRoIn0.cpMyfPkPZy8bkA1VhzK3e2P-2vjO5RaMnF_Tm0cvj9M");
-		ligas = Ligas;
-	}
+
 
 }

@@ -1,0 +1,53 @@
+﻿@page "/register"
+@inject NavigationManager Navigation
+
+<div class="d-flex justify-content-center mt-5">
+    <div class="card p-4 shadow" style="width: 100%; max-width: 400px; border-radius: 15px;">
+        <h3 class="text-center mb-4">Cadastro</h3>
+        <EditForm Model="@user" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <InputText @bind-Value="user.Email" class="form-control" placeholder="Email" />
+            </div>
+            <div class="mb-3">
+                <InputText @bind-Value="user.Password" class="form-control" placeholder="Senha" type="password" />
+            </div>
+            <div class="mb-3">
+                <InputText @bind-Value="user.PasswordConfirm" class="form-control" placeholder="Confirme a Senha" type="password" />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Registrar</button>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3">@errorMessage</div>
+            }
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private UserRegistration user = new UserRegistration();
+    private string errorMessage;
+
+    private async Task HandleValidSubmit()
+    {
+        var httpClient = new HttpClient();
+        var response = await httpClient.PostAsJsonAsync("https://api.ligas.ehtudo.app/webhook/ligas/v1/auth/signin", user);
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/email-verify");
+        }
+        else
+        {
+            errorMessage = "Não possivel se cadastrar, ocorreu algum erro no servidor";
+        }
+    }
+
+    public class UserRegistration
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string PasswordConfirm { get; set; }
+    }
+}
