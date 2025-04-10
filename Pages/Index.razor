@@ -1,0 +1,27 @@
+﻿@page "/"
+@using CartolaLigas.Services
+@inject CustomHttpClientProvider httpClient
+@inject NavigationManager NavigationManager
+@inject LigasService ligasService
+<PageTitle>Home</PageTitle>
+
+<h1>Ligas cartola</h1>
+<p>Cria ligas com seus amigos e compartilhe a zueira, sempre que mitar.</p>
+<p>Crie sua primeira liga e compartilhe com os amigos. <NavLink href="/register">Cadastre-se</NavLink></p>
+
+<h2>Nosso serviço</h2>
+<p>Nosso serviço permite que você crie e gerencie ligas no fantasy game Cartola FC da Globo de forma fácil e divertida.</p>
+<p>Com nossa plataforma, você pode:</p>
+<ul>
+    <li>Criar ligas personalizadas</li>
+    <li>Convidar amigos para participar</li>
+    <li>Compartilhar a zueira com seus amigos</li>
+</ul>
+<p>Não perca tempo, comece agora mesmo e torne-se o campeão das ligas!</p>
+
+<h2>Como funciona</h2>
+<p>Nossa ferramenta não se conectará com o login do Cartola do usuário. Utilizamos dados públicos fornecidos pela API do Cartola FC.</p>
+<p>Você pode <a href="/teams">pesquisar times</a> sem precisar estar logado</p>
+@code{
+
+}
