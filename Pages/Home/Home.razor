@@ -1,0 +1,32 @@
+﻿@page "/home"
+@using CartolaLigas.DTOs
+@using Microsoft.JSInterop
+@inject TimeService TimeService
+<h3>Inicio</h3>
+
+@if (teamDTO == null)
+{
+    <a href="/teams/add-own">Adicionar Time</a>
+}
+else
+{
+    <p>Bem vindo,</p>
+    <p>
+        <strong>Cartola:</strong> @teamDTO.Name
+    </p>
+    <p>
+        <strong>Nome:</strong> @teamDTO.Name
+    </p>
+}
+
+@code {
+    private HttpClient _httpClient = new HttpClient();
+    private TeamDTO? teamDTO;
+
+    protected override async Task OnInitializedAsync()
+    {
+        teamDTO = await TimeService.Time();
+    }
+
+
+}

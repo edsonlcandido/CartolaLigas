@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 
 
 namespace CartolaLigas
@@ -24,6 +25,7 @@ namespace CartolaLigas
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<LigasService>();
             builder.Services.AddScoped<CartolaService>();
+            builder.Services.AddScoped<TimeService>();
             builder.Services.AddAuthorizationCore();
             //builder.Services.AddOidcAuthentication(options =>
             //{

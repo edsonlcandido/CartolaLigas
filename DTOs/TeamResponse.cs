@@ -2,7 +2,7 @@
 
 namespace CartolaLigas.DTOs
 {
-    public class TeamDTO
+    public class TeamCartolaDTO
     {
         [JsonPropertyName("url_escudo_svg")]
         public string UrlEscudoSvg { get; set; }
@@ -33,6 +33,20 @@ namespace CartolaLigas.DTOs
 
         [JsonPropertyName("assinante")]
         public bool? Assinante { get; set; }
+    }
+
+    public class TeamDTO
+    {
+        public string CollectionId { get; set; }
+        public string CollectionName { get; set; }
+        public string Id { get; set; }
+        public string Slug { get; set; }
+        public string Name { get; set; }
+        public int UserId { get; set; }
+        public string CartolaTimeId { get; set; }
+        public string NomeCartola { get; set; }
+        public string Created { get; set; }
+        public string Updated { get; set; }
     }
     public class TeamResponse
     {

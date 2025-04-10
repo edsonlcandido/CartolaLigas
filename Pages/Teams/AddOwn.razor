@@ -1,0 +1,75 @@
+﻿@page "/teams/add-own"
+@using System.Text.Json.Serialization
+@using CartolaLigas.DTOs
+@using System.Text.Json
+@using System.Text
+
+<h3 class="text-center mb-4">Pesquisa de times</h3>
+
+<div class="d-flex justify-content-center">
+	<div class="input-group mb-3" style="max-width: 400px;">
+		<input @bind="searchQuery" class="form-control" placeholder="Digite o nome do time" />
+		<button class="btn btn-primary" @onclick="SearchTeams">
+			<i class="fa-solid fa-magnifying-glass"></i>
+		</button>
+	</div>
+</div>
+
+@if (teams != null)
+{
+	if (teams[0].Nome == null)
+	{
+		<p>Sem resultados</p>
+	}
+	else
+	{
+		<div class="d-flex flex-column align-items-center">
+			@foreach (var team in teams)
+			{
+				<div class="card w-100" style="max-width: 600px;">
+					<div class="row align-items-center">
+						<div class="col-2">
+							<img src="@team.UrlEscudoPng" class="img-fluid rounded-start" alt="@team.Nome" />
+						</div>
+						<div class="col">
+							<div class="card-body">
+								<h5 class="card-title">@team.Nome</h5>
+								<p class="card-text">@team.NomeCartola</p>
+							</div>
+						</div>
+						<div class="col-3"><button class="btn btn-primary" @onclick="() => AddTeam(team)"><i class="fa fa-plus"></i></button>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+	}
+
+}
+
+@code {
+	private string searchQuery;
+	private List<TeamCartolaDTO> teams;
+
+	private async Task SearchTeams()
+	{
+		var httpClient = new HttpClient();
+		var response = await httpClient.GetFromJsonAsync<List<TeamCartolaDTO>>($"https://api.ligas.ehtudo.app/webhook/cartola/v1/busca?query={searchQuery}");
+		teams = response;
+	}
+
+	private async Task AddTeam(TeamCartolaDTO team)
+	{
+		var httpClient = new HttpClient();
+		var content = new StringContent(JsonSerializer.Serialize(new { team.Slug, team.Nome, team.NomeCartola }), Encoding.UTF8, "application/json");
+		var response = await httpClient.PostAsync("https://api.ligas.ehtudo.app/webhook/ligas/v1/time/addOwnTime", content);
+		if (response.IsSuccessStatusCode)
+		{
+			// Handle success (e.g., show a success message or update the UI)
+		}
+		else
+		{
+			// Handle error (e.g., show an error message)
+		}
+	}
+}

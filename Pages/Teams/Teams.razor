@@ -43,12 +43,12 @@
 
 @code {
     private string searchQuery;
-    private List<TeamDTO> teams;
+    private List<TeamCartolaDTO> teams;
 
     private async Task SearchTeams()
     {
         var httpClient = new HttpClient();
-        var response = await httpClient.GetFromJsonAsync<List<TeamDTO>>($"https://api.ligas.ehtudo.app/webhook/cartola/v1/busca?query={searchQuery}");
+        var response = await httpClient.GetFromJsonAsync<List<TeamCartolaDTO>>($"https://api.ligas.ehtudo.app/webhook/cartola/v1/busca?query={searchQuery}");
         teams = response;
     }
 }
