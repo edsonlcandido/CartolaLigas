@@ -49,10 +49,12 @@ namespace CartolaLigas.Providers
                             claims.Add(new Claim(ClaimTypes.Role, userResponse.role));
 
                             // Opcional: Adicionar outras claims
-                            claims.Add(new Claim(ClaimTypes.Name, userResponse.email));
-
+                            //if userResponse.name not exists show userResponse.email
+                            //if userResponse.name not exists show userResponse.email
+                            claims.Add(new Claim(ClaimTypes.Name, userResponse.name == "" ? userResponse.email : userResponse.name));
                             var identity = new ClaimsIdentity(claims, "apiauth_type");
                             var user = new ClaimsPrincipal(identity);
+                            NotifyAuthenticationStateChanged(user);
                             return new AuthenticationState(user);
                         }
                         else
@@ -94,6 +96,10 @@ namespace CartolaLigas.Providers
             var user = _anonymous;
             //JSInterop remove authToken of localstorage
             await _jSRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
+        }
+        private void NotifyAuthenticationStateChanged(ClaimsPrincipal user)
+        {
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
         }
     }

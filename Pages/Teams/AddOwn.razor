@@ -3,6 +3,10 @@
 @using CartolaLigas.DTOs
 @using System.Text.Json
 @using System.Text
+@inject TimeService TimeService
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider authenticationStateProvider
+
 
 <h3 class="text-center mb-4">Pesquisa de times</h3>
 
@@ -37,7 +41,8 @@
 								<p class="card-text">@team.NomeCartola</p>
 							</div>
 						</div>
-						<div class="col-3"><button class="btn btn-primary" @onclick="() => AddTeam(team)"><i class="fa fa-plus"></i></button>
+						<div class="col-2">
+							<button class="btn btn-primary" @onclick="() => AddTeam(team)"><i class="fa fa-plus"></i></button>
 						</div>
 					</div>
 				</div>
@@ -60,16 +65,17 @@
 
 	private async Task AddTeam(TeamCartolaDTO team)
 	{
-		var httpClient = new HttpClient();
-		var content = new StringContent(JsonSerializer.Serialize(new { team.Slug, team.Nome, team.NomeCartola }), Encoding.UTF8, "application/json");
-		var response = await httpClient.PostAsync("https://api.ligas.ehtudo.app/webhook/ligas/v1/time/addOwnTime", content);
-		if (response.IsSuccessStatusCode)
+		TeamDTO teamDTO = new TeamDTO()
+			{
+				Slug = team.Slug,
+				NomeCartola = team.NomeCartola,
+				CartolaTimeId = team.TimeId,
+				Name = team.Nome
+			};
+		var response = TimeService.AddTeam(teamDTO);
+		if (response != null)
 		{
-			// Handle success (e.g., show a success message or update the UI)
-		}
-		else
-		{
-			// Handle error (e.g., show an error message)
+			navigationManager.NavigateTo("/home");
 		}
 	}
 }

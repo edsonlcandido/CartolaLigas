@@ -34,7 +34,7 @@
 		var success = await AuthService.Login(loginModel.Username, loginModel.Password);
 		if (success)
 		{
-			Navigation.NavigateTo("/", true);
+			Navigation.NavigateTo("/home", true);
 		}
 		else
 		{

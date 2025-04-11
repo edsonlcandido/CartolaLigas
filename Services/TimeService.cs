@@ -17,6 +17,25 @@ namespace CartolaLigas.Services
             _httpClient.BaseAddress = new Uri("https://api.ligas.ehtudo.app/");
             _jSRuntime = jSRuntime;
         }
+        public async Task<TeamDTO> AddTeam(TeamDTO teamDTO)
+        {
+            //obter o authToken do localStorage
+            var authToken = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+            if (authToken != null)
+            {
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
+                var handler = new JwtSecurityTokenHandler();
+
+                var response = await _httpClient.PostAsJsonAsync("webhook/ligas/v1/time/addOwnTime", teamDTO);
+                if (response.IsSuccessStatusCode)
+                {
+                    var team = await response.Content.ReadFromJsonAsync<TeamDTO>();
+                    return team;
+                }
+            }
+            return null;
+        }
         public async Task<TeamDTO> Time()
         {
             //obter o authToken do localStorage
@@ -26,10 +45,8 @@ namespace CartolaLigas.Services
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
                 var handler = new JwtSecurityTokenHandler();
-                var jwtToken = handler.ReadJwtToken(authToken);
 
-                var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-                var response = await _httpClient.GetFromJsonAsync<TimeResponse>($"webhook/ligas/v1/time?userId={userId}");
+                var response = await _httpClient.GetFromJsonAsync<TimeResponse>($"webhook/ligas/v1/time");
 
                 if (response.items.Count != 0)
                 {

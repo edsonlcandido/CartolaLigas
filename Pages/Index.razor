@@ -3,6 +3,8 @@
 @inject CustomHttpClientProvider httpClient
 @inject NavigationManager NavigationManager
 @inject LigasService ligasService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 <PageTitle>Home</PageTitle>
 
 <h1>Ligas cartola</h1>
@@ -23,5 +25,14 @@
 <p>Nossa ferramenta não se conectará com o login do Cartola do usuário. Utilizamos dados públicos fornecidos pela API do Cartola FC.</p>
 <p>Você pode <a href="/teams">pesquisar times</a> sem precisar estar logado</p>
 @code{
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
 
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/home");
+        }
+    }
 }

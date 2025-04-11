@@ -43,7 +43,8 @@ namespace CartolaLigas.DTOs
         public string Slug { get; set; }
         public string Name { get; set; }
         public int UserId { get; set; }
-        public string CartolaTimeId { get; set; }
+        public double CartolaTimeId { get; set; }
+        [JsonPropertyName("nome_cartola")]
         public string NomeCartola { get; set; }
         public string Created { get; set; }
         public string Updated { get; set; }
