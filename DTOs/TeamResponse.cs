@@ -33,6 +33,11 @@ namespace CartolaLigas.DTOs
 
         [JsonPropertyName("assinante")]
         public bool? Assinante { get; set; }
+
+        [JsonPropertyName("pontos_campeonato")]
+        public double PontosCampeonato { get; set; }
+        [JsonPropertyName("patrimonio")]
+        public double Patrimonio { get; set; }
     }
 
     public class TeamDTO
