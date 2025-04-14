@@ -36,6 +36,7 @@
     private string searchQuery;
     private List<TeamCartolaDTO> teams;
 
+
     private async Task SearchTeams()
     {
         var httpClient = new HttpClient();
@@ -45,14 +46,24 @@
         {
             foreach (var team in response)
             {
+                bool Manutencao = false;
+                var mercadoStatus = await httpClient.GetFromJsonAsync<MercadoResponse>($"https://bypass.ehtudo.app/https://api.cartola.globo.com/time/id/{team.TimeId}");
+                //var status = await MercadoService.Status;
+
+                Manutencao = mercadoStatus.StatusMercado == 4 ? true : false;
+
                 try
                 {
-                    var teamDetails = await httpClient.GetFromJsonAsync<TeamCartolaDTO>($"https://api.cartola.globo.com/time/id/{team.TimeId}");
-                    if (teamDetails != null)
+                    if (!Manutencao)
                     {
-                        team.PontosCampeonato = teamDetails.PontosCampeonato;
-                        team.Patrimonio = teamDetails.Patrimonio;
+                        var teamDetails = await httpClient.GetFromJsonAsync<TeamCartolaDTO>($"https://bypass.ehtudo.app/https://api.cartola.globo.com/time/id/{team.TimeId}");
+                        if (teamDetails != null)
+                        {
+                            team.PontosCampeonato = teamDetails.PontosCampeonato;
+                            team.Patrimonio = teamDetails.Patrimonio;
+                        }
                     }
+
                 }
                 catch (Exception ex)
                 {
