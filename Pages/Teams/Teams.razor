@@ -22,19 +22,10 @@
         <div class="d-flex flex-column align-items-center">
             @foreach (var team in teams)
             {
-                <div class="card w-100" style="max-width: 600px;">
-                    <div class="row align-items-center">
-                        <div class="col-2">
-                            <img src="@team.UrlEscudoPng" class="img-fluid rounded-start" alt="@team.Nome" />
-                        </div>
-                        <div class="col">
-                            <div class="card-body">
-                                <h5 class="card-title">@team.Nome</h5>
-                                <p class="card-text">@team.NomeCartola</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <TeamCard Team="@team">
+                    <ActionTemplate>
+                    </ActionTemplate>
+                </TeamCard>          
             }
         </div>
     }
@@ -45,10 +36,43 @@
     private string searchQuery;
     private List<TeamCartolaDTO> teams;
 
+
     private async Task SearchTeams()
     {
         var httpClient = new HttpClient();
         var response = await httpClient.GetFromJsonAsync<List<TeamCartolaDTO>>($"https://api.ligas.ehtudo.app/webhook/cartola/v1/busca?query={searchQuery}");
+
+        if (response != null && response[0].Nome != null)
+        {
+            foreach (var team in response)
+            {
+                bool Manutencao = false;
+                var mercadoStatus = await httpClient.GetFromJsonAsync<MercadoResponse>($"https://bypass.ehtudo.app/https://api.cartola.globo.com/time/id/{team.TimeId}");
+                //var status = await MercadoService.Status;
+
+                Manutencao = mercadoStatus.StatusMercado == 4 ? true : false;
+
+                try
+                {
+                    if (!Manutencao)
+                    {
+                        var teamDetails = await httpClient.GetFromJsonAsync<TeamCartolaDTO>($"https://bypass.ehtudo.app/https://api.cartola.globo.com/time/id/{team.TimeId}");
+                        if (teamDetails != null)
+                        {
+                            team.PontosCampeonato = teamDetails.PontosCampeonato;
+                            team.Patrimonio = teamDetails.Patrimonio;
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    // Em caso de erro, mantém os valores padrão (0)
+                    Console.WriteLine($"Erro ao buscar detalhes do time {team.TimeId}: {ex.Message}");
+                }
+            }
+        }
+
         teams = response;
     }
 }

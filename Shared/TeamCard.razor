@@ -1,0 +1,28 @@
+@using CartolaLigas.DTOs
+
+<div class="card w-100 mb-2" style="max-width: 600px;">
+    <div class="row align-items-center">
+        <div class="col-2">
+            <img src="@Team.UrlEscudoPng" class="img-fluid rounded-start" alt="@Team.Nome" />
+        </div>
+        <div class="col">
+            <div class="card-body">
+                <h5 class="card-title">@Team.Nome</h5>
+                <p class="card-text"><i class="fa fa-user"></i> @Team.NomeCartola<br/>
+                <i class="fa fa-hashtag"></i> @Team.PontosCampeonato.ToString("F1")<br/>
+                <i class="fa fa-dollar"></i> @Team.Patrimonio.ToString("F1")</p>
+            </div>
+        </div>
+        <div class="col-3 col-md-2">
+            @ActionTemplate
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public TeamCartolaDTO Team { get; set; }
+
+    [Parameter]
+    public RenderFragment ActionTemplate { get; set; }
+}
