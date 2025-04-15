@@ -1,5 +1,6 @@
 using CartolaLigas.DTOs;
 using CartolaLigas.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,11 +15,13 @@ namespace CartolaLigas.Providers
         private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
         private readonly IJSRuntime _jSRuntime;
         private readonly HttpClient _httpClient;
-        public CustomAuthenticationStateProvider(IJSRuntime jSRuntime, HttpClient httpClient)
+        private readonly NavigationManager _navigationManager;
+        public CustomAuthenticationStateProvider(IJSRuntime jSRuntime, HttpClient httpClient, NavigationManager navigationManager)
         {
             _jSRuntime = jSRuntime;
             _httpClient = httpClient;
             _httpClient.BaseAddress = new Uri("https://api.ligas.ehtudo.app/");
+            _navigationManager = navigationManager;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -59,27 +62,42 @@ namespace CartolaLigas.Providers
                         }
                         else
                         {
+                            await LogoutAndRedirect();
                             return new AuthenticationState(_anonymous);
                         }
                     }
                     catch
                     {
+                        await LogoutAndRedirect();
                         return new AuthenticationState(_anonymous);
                     }
                 }
                 else
                 {
+                    await LogoutAndRedirect();
                     return new AuthenticationState(_anonymous);
                 }
             }
             else
             {
+                await LogoutAndRedirect();
                 return new AuthenticationState(_anonymous);
             }
 
         }
 
-    
+        private async Task LogoutAndRedirect()
+        {
+            // Remover o authToken do localStorage
+            await _jSRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
+
+            // Notificar que o usuário não está autenticado
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
+
+            // Redirecionar para a página inicial
+            _navigationManager.NavigateTo("/");
+        }
+
         public void NotifyUserAuthentication(string userName)
         {
             var identity = new ClaimsIdentity(new[]

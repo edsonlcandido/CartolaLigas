@@ -19,11 +19,23 @@
 	</div>
 </div>
 
+@if (isSearching)
+{
+	<div class="d-flex flex-column align-items-center">
+		<div class="spinner-border text-primary" role="status">
+			<span class="visually-hidden">Carregando...</span>
+		</div>
+		<p>Pesquisando times...</p>
+	</div>
+}
+
 @if (teams != null)
 {
 	if (teams[0].Nome == null)
 	{
-		<p>Sem resultados</p>
+		<div class="d-flex flex-column align-items-center">
+			<p>Sem resultados</p>
+		</div>
 	}
 	else
 	{
@@ -44,44 +56,23 @@
 @code {
 	private string searchQuery;
 	private List<TeamCartolaDTO> teams;
+	private bool isSearching = false;
+	private string? errorMessage = null;
 
 	private async Task SearchTeams()
 	{
-		var httpClient = new HttpClient();
-		var response = await httpClient.GetFromJsonAsync<List<TeamCartolaDTO>>($"https://api.ligas.ehtudo.app/webhook/cartola/v1/busca?query={searchQuery}");
+		teams = null;
+		isSearching = true;
+		StateHasChanged();
 
-		if (response != null && response[0].Nome != null)
+		teams = await TimeService.SearchTeams(searchQuery);
+		if (teams[0].Nome == null)
 		{
-			foreach (var team in response)
-			{
-				bool Manutencao = false;
-				var mercadoStatus = await httpClient.GetFromJsonAsync<MercadoResponse>($"https://bypass.ehtudo.app/https://api.cartola.globo.com/time/id/{team.TimeId}");
-				//var status = await MercadoService.Status;
-
-				Manutencao = mercadoStatus.StatusMercado == 4 ? true : false;
-
-				try
-				{
-					if (!Manutencao)
-					{
-						var teamDetails = await httpClient.GetFromJsonAsync<TeamCartolaDTO>($"https://bypass.ehtudo.app/https://api.cartola.globo.com/time/id/{team.TimeId}");
-						if (teamDetails != null)
-						{
-							team.PontosCampeonato = teamDetails.PontosCampeonato;
-							team.Patrimonio = teamDetails.Patrimonio;
-						}
-					}
-
-				}
-				catch (Exception ex)
-				{
-					// Em caso de erro, mantém os valores padrão (0)
-					Console.WriteLine($"Erro ao buscar detalhes do time {team.TimeId}: {ex.Message}");
-				}
-			}
+			errorMessage = "Nenhum time encontrado";
 		}
 
-		teams = response;
+		isSearching = false;
+		StateHasChanged();
 	}
 
 	private async Task AddTeam(TeamCartolaDTO team)
