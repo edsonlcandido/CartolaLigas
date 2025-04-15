@@ -6,35 +6,23 @@ namespace CartolaLigas.Services
 {
     public class MercadoService
     {
-        private readonly CustomHttpClientProvider _httpClient;
+        private readonly HttpClient _httpClient;
         private MercadoResponse mercadoResponse;
-        public MercadoService(CustomHttpClientProvider httpClient)
+        public MercadoService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("https://bypass.ehtudo.app/");
         }
 
-        public async Task<int> Status()
+        public async Task<MercadoResponse> GetMercadoStatus()
         {
-            var MercadoResponse = await _httpClient.GetFromJsonAsync<MercadoResponse>("https://api.cartola.globo.com/mercado/status");
-            if (mercadoResponse != null)
-            {
-                
-                if (MercadoResponse != null)
-                {
-                    mercadoResponse = MercadoResponse;
-                    return MercadoResponse.StatusMercado;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
+            mercadoResponse = await _httpClient.GetFromJsonAsync<MercadoResponse>("https://bypass.ehtudo.app/https://api.cartola.globo.com/mercado/status");
+            return mercadoResponse;
         }
 
+        public bool IsEmManutencao()
+        {
+            //return true;
+            return mercadoResponse?.StatusMercado == 4;
+        }
     }
 }

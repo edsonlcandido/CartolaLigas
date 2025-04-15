@@ -10,13 +10,54 @@ namespace CartolaLigas.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IJSRuntime _jSRuntime;
+        private readonly MercadoService _mercadoService;
 
-        public TimeService(CustomHttpClientProvider httpClient, IJSRuntime jSRuntime)
+        public TimeService(HttpClient httpClient, IJSRuntime jSRuntime, MercadoService mercadoService)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("https://api.ligas.ehtudo.app/");
             _jSRuntime = jSRuntime;
+            _mercadoService = mercadoService;
         }
+        public async Task<List<TeamCartolaDTO>> SearchTeams(string query, bool details = false)
+        {
+            var teams = await _httpClient.GetFromJsonAsync<List<TeamCartolaDTO>>($"https://api.ligas.ehtudo.app/webhook/cartola/v1/busca?query={query}");
+            if (details)
+            {
+                if (teams != null && teams[0].Nome != null)
+                {
+                    await EnrichTeamsWithDetails(teams);
+                }
+            }
+
+            return teams;
+        }
+
+        private async Task EnrichTeamsWithDetails(List<TeamCartolaDTO> teams)
+        {
+            var mercadoStatus = await _mercadoService.GetMercadoStatus();
+            if (!_mercadoService.IsEmManutencao())
+            {
+                var enrichmentTasks = teams.Select(async team =>
+                {
+                    try
+                    {
+                        var teamDetails = await _httpClient.GetFromJsonAsync<TeamCartolaDTO>($"https://bypass.ehtudo.app/https://api.cartola.globo.com/time/id/{team.TimeId}");
+                        if (teamDetails != null)
+                        {
+                            team.PontosCampeonato = teamDetails.PontosCampeonato;
+                            team.Patrimonio = teamDetails.Patrimonio;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erro ao buscar detalhes do time {team.TimeId}: {ex.Message}");
+                    }
+                });
+
+                await Task.WhenAll(enrichmentTasks);
+            }
+        }
+
         public async Task<TeamDTO> AddTeam(TeamDTO teamDTO)
         {
             //obter o authToken do localStorage

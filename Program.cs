@@ -26,7 +26,8 @@ namespace CartolaLigas
             builder.Services.AddScoped<LigasService>();
             builder.Services.AddScoped<CartolaService>();
             builder.Services.AddScoped<TimeService>();
-            builder.Services.AddScoped<MercadoService>();
+            builder.Services.AddScoped<MercadoService>(); 
+
             builder.Services.AddAuthorizationCore();
             //builder.Services.AddOidcAuthentication(options =>
             //{

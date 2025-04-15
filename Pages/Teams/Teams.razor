@@ -1,78 +1,75 @@
 ﻿@page "/teams"
 @using System.Text.Json.Serialization
 @using CartolaLigas.DTOs
+@inject TimeService TimeService
+@inject MercadoService MercadoService
+
 
 <h3 class="text-center mb-4">Pesquisa de times</h3>
 
 <div class="d-flex justify-content-center">
-    <div class="input-group mb-3" style="max-width: 400px;">
-        <input @bind="searchQuery" class="form-control" placeholder="Digite o nome do time" />
-        <button class="btn btn-primary" @onclick="SearchTeams">
-            <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
-    </div>
+	<div class="input-group mb-3" style="max-width: 400px;">
+		<input @bind="searchQuery" class="form-control" placeholder="Digite o nome do time" />
+		<button class="btn btn-primary" @onclick="SearchTeams">
+			<i class="fa-solid fa-magnifying-glass"></i>
+		</button>
+	</div>
 </div>
+
+@if (isSearching)
+{
+	<div class="d-flex flex-column align-items-center">
+		<div class="spinner-border text-primary" role="status">
+			<span class="visually-hidden">Carregando...</span>
+		</div>
+		<p>Pesquisando times...</p>
+	</div>
+}
 
 @if (teams != null)
 {
-    if (teams[0].Nome == null)
-    {
-        <p>Sem resultados</p>
-    }else{
-        <div class="d-flex flex-column align-items-center">
-            @foreach (var team in teams)
-            {
-                <TeamCard Team="@team">
-                    <ActionTemplate>
-                    </ActionTemplate>
-                </TeamCard>          
-            }
-        </div>
-    }
+	if (teams[0].Nome == null)
+	{
+		<div class="d-flex flex-column align-items-center">
+			<p>@errorMessage</p>
+		</div>
+	}
+	else
+	{
+		<div class="d-flex flex-column align-items-center">
+			@if(MercadoService.IsEmManutencao()){
+				<p>Mercado em manutenção</p>
+			}
+			@foreach (var team in teams)
+			{
+				<TeamCard Team="@team">
+					<ActionTemplate>
+					</ActionTemplate>
+				</TeamCard>
+			}
+		</div>
+	}
 
 }
 
 @code {
-    private string searchQuery;
-    private List<TeamCartolaDTO> teams;
+	private string searchQuery;
+	private List<TeamCartolaDTO> teams;
+	private bool isSearching = false;
+	private string? errorMessage = null;
 
+	private async Task SearchTeams()
+	{
+		isSearching = true;
+		StateHasChanged();
 
-    private async Task SearchTeams()
-    {
-        var httpClient = new HttpClient();
-        var response = await httpClient.GetFromJsonAsync<List<TeamCartolaDTO>>($"https://api.ligas.ehtudo.app/webhook/cartola/v1/busca?query={searchQuery}");
+		teams = await TimeService.SearchTeams(searchQuery, !MercadoService.IsEmManutencao());
+		if (teams[0].Nome == null)
+		{
+			errorMessage = "Nenhum time encontrado";
+		}
 
-        if (response != null && response[0].Nome != null)
-        {
-            foreach (var team in response)
-            {
-                bool Manutencao = false;
-                var mercadoStatus = await httpClient.GetFromJsonAsync<MercadoResponse>($"https://bypass.ehtudo.app/https://api.cartola.globo.com/time/id/{team.TimeId}");
-                //var status = await MercadoService.Status;
-
-                Manutencao = mercadoStatus.StatusMercado == 4 ? true : false;
-
-                try
-                {
-                    if (!Manutencao)
-                    {
-                        var teamDetails = await httpClient.GetFromJsonAsync<TeamCartolaDTO>($"https://bypass.ehtudo.app/https://api.cartola.globo.com/time/id/{team.TimeId}");
-                        if (teamDetails != null)
-                        {
-                            team.PontosCampeonato = teamDetails.PontosCampeonato;
-                            team.Patrimonio = teamDetails.Patrimonio;
-                        }
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    // Em caso de erro, mantém os valores padrão (0)
-                    Console.WriteLine($"Erro ao buscar detalhes do time {team.TimeId}: {ex.Message}");
-                }
-            }
-        }
-
-        teams = response;
-    }
+		isSearching = false;
+		StateHasChanged();
+	}
 }
