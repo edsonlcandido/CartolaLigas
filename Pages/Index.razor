@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using CartolaLigas.Services
 @inject CustomHttpClientProvider httpClient
 @inject NavigationManager NavigationManager
@@ -7,31 +7,32 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Ligas cartola</h1>
-<p>Cria ligas com seus amigos e compartilhe a zueira, sempre que mitar.</p>
-<p>Crie sua primeira liga e compartilhe com os amigos. <NavLink href="/register">Cadastre-se</NavLink></p>
+<h1>Crie sua Liga no Cartola FC</h1>
+<h4>Reúna seus amigos, crie ligas épicas e dispute a zueira no Cartola FC!</h4>
+<h4>Não fique de fora! <a role="button" class="btn btn-primary" href="/register">Cadastre-se agora</a> e crie sua primeira liga.</h4>
+<br />
 
-<h2>Nosso serviço</h2>
-<p>Nosso serviço permite que você crie e gerencie ligas no fantasy game Cartola FC da Globo de forma fácil e divertida.</p>
-<p>Com nossa plataforma, você pode:</p>
+<h3>Nosso serviço</h3>
+<h4>Aqui você comanda! Nossa plataforma te dá o poder de:</h4>
 <ul>
-    <li>Criar ligas personalizadas</li>
-    <li>Convidar amigos para participar</li>
-    <li>Compartilhar a zueira com seus amigos</li>
+    <li>⚽ Criar ligas personalizadas e exclusivas.</li>
+    <li>🤝 Convidar seus amigos para a disputa.</li>
+    <li>😂 Dominar a zueira quando você der aquela mitada!</li>
 </ul>
-<p>Não perca tempo, comece agora mesmo e torne-se o campeão das ligas!</p>
+<h3>Como funciona</h3>
+<h4>É simples, rápido e seguro</h4>
+<ul>
+    <li>📊 Dados públicos direto da API do Cartola FC.</li>
+    <li>🔒 Nossa plataforma não utiliza seu login globo ou cartola.</li>
+</ul>
+<h4>Você pode <a role="button" class="btn btn-primary" href="/teams">pesquisar times</a> sem precisar estar logado</h4>
 
-<h2>Como funciona</h2>
-<p>Nossa ferramenta não se conectará com o login do Cartola do usuário. Utilizamos dados públicos fornecidos pela API do Cartola FC.</p>
-<p>Você pode <a href="/teams">pesquisar times</a> sem precisar estar logado</p>
 @code{
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-
-        if (user.Identity != null && user.Identity.IsAuthenticated)
-        {
+        if (user.Identity != null && user.Identity.IsAuthenticated){
             NavigationManager.NavigateTo("/home");
         }
     }
