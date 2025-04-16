@@ -21,8 +21,14 @@ namespace CartolaLigas.Services
 
         public bool IsEmManutencao()
         {
+
             //return true;
             return mercadoResponse?.StatusMercado == 4;
+        }
+        
+        public int GetRodadaAtual()
+        {
+            return mercadoResponse?.RodadaAtual ?? 0;
         }
     }
 }

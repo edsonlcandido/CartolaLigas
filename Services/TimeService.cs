@@ -58,17 +58,44 @@ namespace CartolaLigas.Services
             }
         }
 
-        public async Task<TeamDTO> AddTeam(TeamDTO teamDTO)
+        public async Task<TeamDTO> AddTime(TeamDTO teamDTO)
+        {
+            // Verificar se o time já existe na base de dados
+            var existingTeamResponse = await _httpClient.GetFromJsonAsync<TimeResponse>($"https://api.ligas.ehtudo.app/api/collections/times/records?filter=(cartola_time_id={teamDTO.CartolaTimeId})");
+            if (existingTeamResponse != null && existingTeamResponse.items != null && existingTeamResponse.items.Count > 0)
+            {
+                // Retornar o time existente
+                return existingTeamResponse.items[0];
+            }
+
+            _httpClient.DefaultRequestHeaders.Clear();
+            var response = await _httpClient.PostAsJsonAsync("https://api.ligas.ehtudo.app/api/collections/times/records", teamDTO);
+            if (response.IsSuccessStatusCode)
+            {
+                var team = await response.Content.ReadFromJsonAsync<TeamDTO>();
+                List<Object> timeRodadaQueue = new List<Object>();
+                await _mercadoService.GetMercadoStatus();
+                for (int i = 1; i < _mercadoService.GetRodadaAtual(); i++)
+                {
+                    var timeRodada = new { rodada = i, time_id = team.Id, status = "aguardando" };
+                    await _httpClient.PostAsJsonAsync($"https://api.ligas.ehtudo.app/api/collections/job_queue/records", timeRodada);
+                }
+                return team;
+            }
+            return null;
+        }
+        public async Task<TeamDTO> AddOwnTeam(TeamDTO teamDTO)
         {
             //obter o authToken do localStorage
             var authToken = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
-            if (authToken != null)
+            var addedTeam = await AddTime(teamDTO);
+            if (authToken != null || addedTeam != null)
             {
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
                 var handler = new JwtSecurityTokenHandler();
 
-                var response = await _httpClient.PostAsJsonAsync("webhook/ligas/v1/time/addOwnTime", teamDTO);
+                var response = await _httpClient.PostAsJsonAsync("https://api.ligas.ehtudo.app/webhook/ligas/v1/time/addOwnTime", addedTeam);
                 if (response.IsSuccessStatusCode)
                 {
                     var team = await response.Content.ReadFromJsonAsync<TeamDTO>();
@@ -77,6 +104,27 @@ namespace CartolaLigas.Services
             }
             return null;
         }
+        public async Task RemoveOwnTeam(TeamDTO teamDTO)
+        {
+            //obter o authToken do localStorage
+            var authToken = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+            if (authToken != null)
+            {
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
+                var response = await _httpClient.PostAsJsonAsync($"https://api.ligas.ehtudo.app/webhook/ligas/v1/time/removeOwnTime",teamDTO);
+                if (response.IsSuccessStatusCode)
+                {
+                    var team = await response.Content.ReadFromJsonAsync<TeamDTO>();
+                }
+                else
+                {
+                    //return a mensagem de erro
+                    var errorResponse = "Não foi possivel desvincular o time para esse usuario";
+                }
+            }
+        }
+
         public async Task<TeamDTO> Time()
         {
             //obter o authToken do localStorage
@@ -87,7 +135,7 @@ namespace CartolaLigas.Services
                 _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
                 var handler = new JwtSecurityTokenHandler();
 
-                var response = await _httpClient.GetFromJsonAsync<TimeResponse>($"webhook/ligas/v1/time");
+                var response = await _httpClient.GetFromJsonAsync<TimeResponse>($"https://api.ligas.ehtudo.app/webhook/ligas/v1/time");
 
                 if (response.items.Count != 0)
                 {
@@ -102,6 +150,30 @@ namespace CartolaLigas.Services
             {
                 return null;
             }
+        }
+
+        private async Task adicionarPontuacaoTime()
+        {
+            var response = await _httpClient.GetFromJsonAsync<Object>($"https://api.ligas.ehtudo.app/webhook/ligas/v1/time");
+
+        }
+
+        public class ErrorResponse
+        {
+            public ErrorData Data { get; set; }
+            public string Message { get; set; }
+            public int Status { get; set; }
+        }
+
+        public class ErrorData
+        {
+            public ErrorDetail CartolaTimeId { get; set; }
+        }
+
+        public class ErrorDetail
+        {
+            public string Code { get; set; }
+            public string Message { get; set; }
         }
 
         public class TimeResponse

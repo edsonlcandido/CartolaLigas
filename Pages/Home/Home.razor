@@ -15,8 +15,11 @@ else
         <strong>Cartola:</strong> @teamDTO.NomeCartola
     </p>
     <p>
-        <strong>Time:</strong> @teamDTO.Name
+        <strong>Time:</strong> @teamDTO.Name 
     </p>
+    <button class="btn btn-danger" @onclick="RemoveTeam">
+        <i class="fas fa-link-slash"></i> Desvincular Time
+    </button>
 }
 
 @code {
@@ -28,5 +31,13 @@ else
         teamDTO = await TimeService.Time();
     }
 
+    private async Task RemoveTeam()
+    {
+		await TimeService.RemoveOwnTeam(teamDTO);
 
+        // Lógica para remover o time
+        teamDTO = null;
+        // Chame o serviço para remover o time do usuário, se necessário
+        // await TimeService.RemoveTeam(teamDTO.Id);
+    }
 }
