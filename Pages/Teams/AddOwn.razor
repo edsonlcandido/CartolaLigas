@@ -44,7 +44,7 @@
 			{
 				<TeamCard Team="@team">
 					<ActionTemplate>
-						<button class="btn btn-primary" @onclick="() => AddTeam(team)"><i class="fa fa-plus"></i></button>
+						<button class="btn btn-primary" @onclick="() => AddTeam(team)"><i class="fa fa-link"></i></button>
 					</ActionTemplate>
 				</TeamCard>
 			}
@@ -84,7 +84,7 @@
 				CartolaTimeId = team.TimeId,
 				Name = team.Nome
 			};
-		var response = TimeService.AddTeam(teamDTO);
+		var response = TimeService.AddOwnTeam(teamDTO);
 		if (response != null)
 		{
 			navigationManager.NavigateTo("/home");
