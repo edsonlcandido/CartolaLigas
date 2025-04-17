@@ -30,7 +30,7 @@ namespace CartolaLigas.Services
                 name = name
             };
 
-            var response = await _httpClient.PostAsJsonAsync<CreateLeagueRequest>("webhook-test/ligas/v1/liga/", createLeagueRequest);
+            var response = await _httpClient.PostAsJsonAsync<CreateLeagueRequest>("webhook/ligas/v1/liga/", createLeagueRequest);
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
