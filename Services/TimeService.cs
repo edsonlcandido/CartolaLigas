@@ -11,6 +11,8 @@ namespace CartolaLigas.Services
         private readonly HttpClient _httpClient;
         private readonly IJSRuntime _jSRuntime;
         private readonly MercadoService _mercadoService;
+        private TeamDTO? _cachedTeam; // Cache em memória para o time
+
 
         public TimeService(HttpClient httpClient, IJSRuntime jSRuntime, MercadoService mercadoService)
         {
@@ -84,10 +86,10 @@ namespace CartolaLigas.Services
             }
             return null;
         }
-        public async Task<TeamDTO> AddOwnTeam(TeamDTO teamDTO)
+        public async Task<TeamDTO> AddOwnTeam(TeamDTO teamDTO, string? token = null)
         {
             //obter o authToken do localStorage
-            var authToken = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+            var authToken = token ?? await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
             var addedTeam = await AddTime(teamDTO);
             if (authToken != null || addedTeam != null)
             {
@@ -104,10 +106,10 @@ namespace CartolaLigas.Services
             }
             return null;
         }
-        public async Task RemoveOwnTeam(TeamDTO teamDTO)
+        public async Task RemoveOwnTeam(TeamDTO teamDTO, string? token = null)
         {
             //obter o authToken do localStorage
-            var authToken = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+            var authToken = token ?? await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
             if (authToken != null)
             {
                 _httpClient.DefaultRequestHeaders.Clear();
@@ -116,6 +118,7 @@ namespace CartolaLigas.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var team = await response.Content.ReadFromJsonAsync<TeamDTO>();
+                    ClearCache();
                 }
                 else
                 {
@@ -125,10 +128,16 @@ namespace CartolaLigas.Services
             }
         }
 
-        public async Task<TeamDTO> Time()
+        public async Task<TeamDTO> Time(string? token = null)
         {
+            // Verificar se o time já está no cache
+            if (_cachedTeam != null)
+            {
+                return _cachedTeam;
+            }
+
             //obter o authToken do localStorage
-            var authToken = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+            var authToken = token ?? await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
             if (authToken != null)
             {
                 _httpClient.DefaultRequestHeaders.Clear();
@@ -139,7 +148,8 @@ namespace CartolaLigas.Services
 
                 if (response.items.Count != 0)
                 {
-                    return response.items[0];
+                    _cachedTeam = response.items[0]; // Armazenar no cache
+                    return _cachedTeam;
                 }
                 else
                 {
@@ -150,6 +160,10 @@ namespace CartolaLigas.Services
             {
                 return null;
             }
+        }
+        public void ClearCache()
+        {
+            _cachedTeam = null; // Limpar o cache quando necessário
         }
 
         private async Task adicionarPontuacaoTime()

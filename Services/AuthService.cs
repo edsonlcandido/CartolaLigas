@@ -10,7 +10,7 @@ namespace CartolaLigas.Services
         private readonly HttpClient _httpClient;
         private readonly IJSRuntime _jSRuntime;
 
-        public AuthService(CustomHttpClientProvider httpClient, IJSRuntime jSRuntime)
+        public AuthService(HttpClient httpClient, IJSRuntime jSRuntime)
         {
             _httpClient = httpClient;
             _httpClient.BaseAddress = new Uri("https://api.ligas.ehtudo.app/");
@@ -43,6 +43,19 @@ namespace CartolaLigas.Services
             {
                 return null;
             }
+        }
+
+        public async Task<string> GetToken(string username, string password)
+        {
+            var response = await _httpClient.PostAsJsonAsync(
+                "api/collections/users/auth-with-password",
+                new { identity = username, password = password });
+            if (response.IsSuccessStatusCode)
+            {
+                var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
+                return authResponse.token;
+            }
+             return string.Empty;
         }
 
 

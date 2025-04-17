@@ -5,6 +5,8 @@ VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CartolaLigas", "CartolaLigas.csproj", "{B32A3384-CAEB-44B1-BFD5-774F14C6A454}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CartolaLigas.TestConsole", "..\CartolaLigas.TestConsole\CartolaLigas.TestConsole.csproj", "{C3AFFE0B-AF5D-4F0E-8DE5-EC0F6E878308}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{B32A3384-CAEB-44B1-BFD5-774F14C6A454}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B32A3384-CAEB-44B1-BFD5-774F14C6A454}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B32A3384-CAEB-44B1-BFD5-774F14C6A454}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3AFFE0B-AF5D-4F0E-8DE5-EC0F6E878308}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3AFFE0B-AF5D-4F0E-8DE5-EC0F6E878308}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3AFFE0B-AF5D-4F0E-8DE5-EC0F6E878308}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3AFFE0B-AF5D-4F0E-8DE5-EC0F6E878308}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

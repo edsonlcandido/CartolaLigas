@@ -1,0 +1,52 @@
+﻿@page "/leagues"
+@using CartolaLigas.Services
+@inject LigasService LigasService
+<h3>Ligas</h3>
+
+@if (isLoading)
+{
+	<p>Carregando...</p>
+}
+else if (ligas == null || !ligas.Any())
+{
+<p>Nenhuma liga encontrada.</p>
+<ul>
+	<li>
+		<button class="btn btn-primary" @onclick="AdicionarLiga">
+			<i class="fas fa-plus"></i> Adicionar Liga
+		</button>
+	</li>
+</ul>
+}
+else
+{
+<ul>
+	@foreach (var liga in ligas)
+	{
+		<li>@liga.name</li>
+	}
+</ul>
+}
+
+@code {
+	private List<Liga> ligas;
+	private bool isLoading = true; // Variável para controlar o estado de carregamento
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			ligas = await LigasService.ListarAsync(); // Agora usa o cache
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private void AdicionarLiga()
+	{
+		// Lógica para adicionar uma nova liga
+		Console.WriteLine("Adicionar Liga clicado!");
+	}
+}
