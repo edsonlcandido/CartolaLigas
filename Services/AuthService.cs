@@ -45,6 +45,19 @@ namespace CartolaLigas.Services
             }
         }
 
+        public async Task<string> GetToken(string username, string password)
+        {
+            var response = await _httpClient.PostAsJsonAsync(
+                "api/collections/users/auth-with-password",
+                new { identity = username, password = password });
+            if (response.IsSuccessStatusCode)
+            {
+                var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
+                return authResponse.token;
+            }
+             return string.Empty;
+        }
+
 
         public async Task Logout()
         {
