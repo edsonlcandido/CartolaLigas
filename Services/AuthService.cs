@@ -10,7 +10,7 @@ namespace CartolaLigas.Services
         private readonly HttpClient _httpClient;
         private readonly IJSRuntime _jSRuntime;
 
-        public AuthService(CustomHttpClientProvider httpClient, IJSRuntime jSRuntime)
+        public AuthService(HttpClient httpClient, IJSRuntime jSRuntime)
         {
             _httpClient = httpClient;
             _httpClient.BaseAddress = new Uri("https://api.ligas.ehtudo.app/");

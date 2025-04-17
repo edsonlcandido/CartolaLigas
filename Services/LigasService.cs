@@ -10,15 +10,15 @@ namespace CartolaLigas.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IJSRuntime _jSRuntime;
+        private List<Liga>? _cachedLigas; // Cache em memória para as ligas
 
         public LigasService(HttpClient httpClient, IJSRuntime jSRuntime)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("https://api.ligas.ehtudo.app/");
             _jSRuntime = jSRuntime;
         }
 
-        public async Task CreateAsync(string name, string? token = null)
+        public async Task<Liga> CreateAsync(string name, string? token = null)
         {
             var authToken = token ?? await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
 
@@ -30,32 +30,51 @@ namespace CartolaLigas.Services
                 name = name
             };
 
-            var response = await _httpClient.PostAsJsonAsync<CreateLeagueRequest>("webhook/ligas/v1/liga/", createLeagueRequest);
+            var response = await _httpClient.PostAsJsonAsync<CreateLeagueRequest>("https://api.ligas.ehtudo.app/webhook/ligas/v1/liga/", createLeagueRequest);
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(content);
+                //response volta um objeto com os dados da liga criada
+                //var content = await response.Content.ReadAsStringAsync();
+
+                var listLiga = response.Content.ReadFromJsonAsync<List<Liga>>();
+                if (listLiga.Result.Count > 0)
+                {
+                    return listLiga.Result.FirstOrDefault();
+                }
+                else
+                {
+                    return null;
+                }     
             }
             else
             {
                 //precisava tenar criar a liga adicionando um numero no final do slug deve tentar
-                Console.WriteLine("Erro ao criar liga");
+                return null; 
             }
         }
-        public async Task<List<Liga>> ListarAsync()
+        public async Task<List<Liga>> ListarAsync(string? token = null)
         {
-            var authToken = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+            // Verificar se as ligas já estão no cache
+            if (_cachedLigas != null)
+            {
+                return _cachedLigas;
+            }
+
+            var authToken = token ?? await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
 
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
 
-            var response = await _httpClient.GetFromJsonAsync<ListarLigas>("api/collections/ligas/records");
+            var response = await _httpClient.GetFromJsonAsync<ListarLigas>("https://api.ligas.ehtudo.app/api/collections/ligas/records");
             if (response == null)
             {
                 Console.WriteLine("Erro ao listar ligas");
                 return new List<Liga>();
             }
-            return response.items;
+
+            _cachedLigas = response.items; // Armazenar no cache
+            return _cachedLigas;
+
             //if (response.IsSuccessStatusCode)
             //{
             //    var content = await response.Content.ReadAsStringAsync();
@@ -66,7 +85,13 @@ namespace CartolaLigas.Services
             //    Console.WriteLine("Erro ao listar ligas");
             //}
         }
+        public void ClearCache()
+        {
+            _cachedLigas = null; // Limpar o cache quando necessário
+        }
     }
+
+        
 
     internal class CreateLeagueRequest
     {

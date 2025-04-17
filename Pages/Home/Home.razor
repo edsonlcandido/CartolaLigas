@@ -4,7 +4,12 @@
 @inject TimeService TimeService
 <h3>Inicio</h3>
 
-@if (teamDTO == null)
+@if (isLoading)
+{
+    <p>Carregando...</p>
+}
+
+else if (teamDTO == null)
 {
     <a href="/teams/add-own">Adicionar Time</a>
 }
@@ -23,12 +28,20 @@ else
 }
 
 @code {
-    private HttpClient _httpClient = new HttpClient();
     private TeamDTO? teamDTO;
+    private bool isLoading = true; // Variável para controlar o estado de carregamento
+
 
     protected override async Task OnInitializedAsync()
     {
-        teamDTO = await TimeService.Time();
+        try
+        {
+            teamDTO = await TimeService.Time();
+        }
+        finally
+        {
+            isLoading = false; // Finaliza o estado de carregamento
+        }
     }
 
     private async Task RemoveTeam()
