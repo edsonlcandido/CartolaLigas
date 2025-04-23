@@ -65,7 +65,7 @@ namespace CartolaLigas.Services
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
 
-            var response = await _httpClient.GetFromJsonAsync<ListarLigas>("https://api.ligas.ehtudo.app/api/collections/ligas/records");
+            var response = await _httpClient.GetFromJsonAsync<ListarLigas>("https://api.ligas.ehtudo.app/webhook/ligas/v1/liga/");
             if (response == null)
             {
                 Console.WriteLine("Erro ao listar ligas");
@@ -88,6 +88,20 @@ namespace CartolaLigas.Services
         public void ClearCache()
         {
             _cachedLigas = null; // Limpar o cache quando necessário
+        }
+
+        public async Task<List<Liga>> DeleteAsync(Liga liga, string? token = null)
+        {
+            var authToken = token ?? await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
+
+            var response = await _httpClient.DeleteAsync($"https://api.ligas.ehtudo.app/api/collections/ligas/records/{liga.id}");
+
+            ClearCache();
+
+            return await ListarAsync();
         }
     }
 
