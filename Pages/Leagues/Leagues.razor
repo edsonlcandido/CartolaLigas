@@ -1,42 +1,93 @@
 ﻿@page "/leagues"
 @using CartolaLigas.Services
+@using CartolaLigas.Extensions
 @inject LigasService LigasService
+@inject AuthService AuthService
 <h3>Ligas</h3>
 
 @if (isLoading)
 {
 	<p>Carregando...</p>
 }
-else if (ligas == null || !ligas.Any())
-{
-<p>Nenhuma liga encontrada.</p>
-<ul>
-	<li>
-		<button class="btn btn-primary" @onclick="AdicionarLiga">
-			<i class="fas fa-plus"></i> Adicionar Liga
-		</button>
-	</li>
-</ul>
-}
 else
 {
-<ul>
-	@foreach (var liga in ligas)
-	{
-		<li>@liga.name</li>
-	}
-</ul>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Nome</th>
+				<th></th> <!-- Coluna de ações sem título -->
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var liga in ligas)
+			{
+				<tr>
+					<td>@liga.name</td>
+					<td>
+						<button class="btn btn-sm btn-primary" @onclick="() => EditarLiga(liga.id)">
+							<i class="fas fa-edit"></i>
+						</button>
+						<button class="btn btn-sm btn-danger" @onclick="() => DeletarLiga(liga)">
+							<i class="fas fa-trash"></i>
+						</button>
+					</td>
+				</tr>
+			}
+			@if (ligas.Count < maxLeagues)
+			{
+				for (int i = 0; i < (maxLeagues- ligas.Count) ; i++)
+				{
+					<tr>
+						<td colspan="2">
+							<button class="btn btn-sm btn-success" @onclick="AbrirModalAdicionarLiga">
+								<i class="fas fa-plus"></i>
+							</button>
+						</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
 }
+
+<!-- Modal para adicionar liga -->
+<div class="modal fade @modalClass" tabindex="-1" style="display:@(isModalOpen ? "block" : "none");" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Adicionar Liga</h5>
+				<button type="button" class="btn-close" @onclick="FecharModalAdicionarLiga" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="mb-3">
+					<label for="leagueName" class="form-label">Nome da Liga</label>
+					<input id="leagueName" class="form-control" @bind="novaLigaNome" placeholder="Digite o nome da liga" />
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" @onclick="FecharModalAdicionarLiga">Cancelar</button>
+				<button type="button" class="btn btn-primary" @onclick="AdicionarLiga">Salvar</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 @code {
 	private List<Liga> ligas;
-	private bool isLoading = true; // Variável para controlar o estado de carregamento
+	private bool isLoading = true;
+	private int maxLeagues;
+
+	// Variáveis para o modal
+	private bool isModalOpen = false;
+	private string modalClass = "";
+	private string novaLigaNome;
 
 	protected override async Task OnInitializedAsync()
 	{
 		try
 		{
-			ligas = await LigasService.ListarAsync(); // Agora usa o cache
+			maxLeagues = await AuthService.MaxLeagues();
+			ligas = await LigasService.ListarAsync();
 		}
 		finally
 		{
@@ -44,9 +95,46 @@ else
 		}
 	}
 
-	private void AdicionarLiga()
+	private void AbrirModalAdicionarLiga()
 	{
-		// Lógica para adicionar uma nova liga
-		Console.WriteLine("Adicionar Liga clicado!");
+		isModalOpen = true;
+		modalClass = "show";
+	}
+
+	private void FecharModalAdicionarLiga()
+	{
+		isModalOpen = false;
+		modalClass = "";
+		novaLigaNome = string.Empty; // Limpar o campo de entrada
+	}
+
+	private async Task AdicionarLiga()
+	{
+		if (!string.IsNullOrWhiteSpace(novaLigaNome))
+		{
+			var slug = novaLigaNome.ToSlug();
+			var novaLiga = await LigasService.CreateAsync(novaLigaNome);
+
+			if (novaLiga != null)
+			{
+				ligas.Add(novaLiga);
+				FecharModalAdicionarLiga();
+			}
+			else
+			{
+				Console.WriteLine("Erro ao criar a liga.");
+			}
+		}
+	}
+
+	private async Task EditarLiga(string id)
+	{
+
+	}
+
+	private async Task DeletarLiga(Liga liga)
+	{
+		ligas = await LigasService.DeleteAsync(liga);
+		StateHasChanged();
 	}
 }
