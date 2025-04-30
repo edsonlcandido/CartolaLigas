@@ -1,14 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CartolaLigas.DTOs
+namespace CartolaLigas.Models
 {
-    public class AuthResponse
-    {
-        public string token { get; set; }
-        public UserDTO record { get; set; }
-    }
-
-    public class UserDTO
+    public class User
     {
         public string collectionId { get; set; }
         public string collectionName { get; set; }

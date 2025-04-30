@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Json;
-using CartolaLigas.DTOs;
+using CartolaLigas.DTOs.Response;
+using CartolaLigas.Models;
 using CartolaLigas.Providers;
 using Microsoft.JSInterop;
 
@@ -10,7 +11,7 @@ namespace CartolaLigas.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IJSRuntime _jSRuntime;
-        private UserDTO _cachedUserDTO;
+        private User _cachedUserDTO;
 
         public AuthService(HttpClient httpClient, IJSRuntime jSRuntime)
         {
@@ -33,7 +34,7 @@ namespace CartolaLigas.Services
             }
             return false;
         }
-        public async Task<UserDTO?> UserView(string token, string id)
+        public async Task<User?> UserView(string token, string id)
         {
             //obter o _cachedUserDTO se não for null
             if (_cachedUserDTO != null)
@@ -42,7 +43,7 @@ namespace CartolaLigas.Services
             }
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("Authorization", token);
-            var response = await _httpClient.GetFromJsonAsync<UserDTO>($"https://api.ligas.ehtudo.app/api/collections/users/records/{id}");
+            var response = await _httpClient.GetFromJsonAsync<User>($"https://api.ligas.ehtudo.app/api/collections/users/records/{id}");
             if (response.id != null)
             {
                 _cachedUserDTO = response;

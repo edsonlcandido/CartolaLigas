@@ -11,6 +11,7 @@ namespace CartolaLigas.Services
         private readonly HttpClient _httpClient;
         private readonly IJSRuntime _jSRuntime;
         private List<Liga>? _cachedLigas; // Cache em memória para as ligas
+        private Liga _cachedLiga;
 
         public LigasService(HttpClient httpClient, IJSRuntime jSRuntime)
         {
@@ -102,6 +103,13 @@ namespace CartolaLigas.Services
             ClearCache();
 
             return await ListarAsync();
+        }
+        public async Task<Liga> LigaAsync(string id)
+        {
+            _httpClient.DefaultRequestHeaders.Clear();
+            var response = await _httpClient.GetFromJsonAsync<Liga>($"https://api.ligas.ehtudo.app/api/collections/ligas/records/{id}");
+            _cachedLiga = response;
+            return _cachedLiga;
         }
     }
 

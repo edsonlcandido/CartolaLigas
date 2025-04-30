@@ -1,4 +1,4 @@
-@using CartolaLigas.DTOs
+@using CartolaLigas.Models
 
 <div class="card w-100 mb-2" style="max-width: 600px;">
 	<div class="row align-items-center">
@@ -27,7 +27,7 @@
 
 @code {
 	[Parameter]
-	public TeamCartolaDTO Team { get; set; }
+	public Models.Cartola.Time Team { get; set; }
 
 	[Parameter]
 	public RenderFragment ActionTemplate { get; set; }
