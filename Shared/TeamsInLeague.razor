@@ -1,0 +1,23 @@
+﻿
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nome do Time</th>
+            <th>Nome do Cartola</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var time in TimesDaLiga)
+        {
+            <tr>
+                <td>@time.Name</td>
+                <td>@time.NomeCartola</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public List<CartolaLigas.Models.Time> TimesDaLiga { get; set; }
+}
