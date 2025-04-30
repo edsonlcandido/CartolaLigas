@@ -1,0 +1,32 @@
+﻿@inject TimeService TimeService
+@inject MercadoService MercadoService
+@if (MostrarModal)
+{
+    <div class="modal fade show" tabindex="-1" style="display: block;" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Time à Liga</h5>
+                    <button type="button" class="btn-close" @onclick="FecharModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="FecharModal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool MostrarModal { get; set; }
+
+    [Parameter]
+    public EventCallback FecharModal { get; set; }
+
+    private string termoPesquisa = "";
+
+}
