@@ -3,6 +3,7 @@
 @using CartolaLigas.Extensions
 @inject LigasService LigasService
 @inject AuthService AuthService
+@inject NavigationManager NavigationManager
 <h3>Ligas</h3>
 
 @if (isLoading)
@@ -127,10 +128,11 @@ else
 		}
 	}
 
-	private async Task EditarLiga(string id)
-	{
-
-	}
+    private async Task EditarLiga(string id)  
+    {  
+       // Navegar para a URL com o ID da liga  
+       NavigationManager.NavigateTo($"/leagues/edit/{id}");  
+    }
 
 	private async Task DeletarLiga(Liga liga)
 	{

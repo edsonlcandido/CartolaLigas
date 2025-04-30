@@ -1,5 +1,6 @@
 ﻿@page "/teams/add-own"
 @using System.Text.Json.Serialization
+@using CartolaLigas.Models.Cartola
 @using CartolaLigas.DTOs
 @using System.Text.Json
 @using System.Text
@@ -55,7 +56,7 @@
 
 @code {
 	private string searchQuery;
-	private List<TeamCartolaDTO> teams;
+	private List<Models.Cartola.Time> teams;
 	private bool isSearching = false;
 	private string? errorMessage = null;
 
@@ -75,16 +76,16 @@
 		StateHasChanged();
 	}
 
-	private async Task AddTeam(TeamCartolaDTO team)
+	private async Task AddTeam(Models.Cartola.Time team)
 	{
-		TeamDTO teamDTO = new TeamDTO()
+            Models.Time time = new Models.Time()
 			{
 				Slug = team.Slug,
 				NomeCartola = team.NomeCartola,
 				CartolaTimeId = team.TimeId,
 				Name = team.Nome
 			};
-		var response = TimeService.AddOwnTeam(teamDTO);
+		var response = TimeService.AddOwnTeam(time);
 		if (response != null)
 		{
 			navigationManager.NavigateTo("/home");

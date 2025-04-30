@@ -9,7 +9,7 @@
     <p>Carregando...</p>
 }
 
-else if (teamDTO == null)
+else if (time == null)
 {
     <a href="/teams/add-own">Adicionar Time</a>
 }
@@ -17,10 +17,10 @@ else
 {
     <p>Bem vindo,</p>
     <p>
-        <strong>Cartola:</strong> @teamDTO.NomeCartola
+        <strong>Cartola:</strong> @time.NomeCartola
     </p>
     <p>
-        <strong>Time:</strong> @teamDTO.Name 
+        <strong>Time:</strong> @time.Name 
     </p>
     <button class="btn btn-danger" @onclick="RemoveTeam">
         <i class="fas fa-link-slash"></i> Desvincular Time
@@ -28,7 +28,7 @@ else
 }
 
 @code {
-    private TeamDTO? teamDTO;
+    private Models.Time? time;
     private bool isLoading = true; // Variável para controlar o estado de carregamento
 
 
@@ -36,7 +36,7 @@ else
     {
         try
         {
-            teamDTO = await TimeService.Time();
+            time = await TimeService.Time();
         }
         finally
         {
@@ -46,10 +46,10 @@ else
 
     private async Task RemoveTeam()
     {
-		await TimeService.RemoveOwnTeam(teamDTO);
+		await TimeService.RemoveOwnTeam(time);
 
         // Lógica para remover o time
-        teamDTO = null;
+        time = null;
         // Chame o serviço para remover o time do usuário, se necessário
         // await TimeService.RemoveTeam(teamDTO.Id);
     }

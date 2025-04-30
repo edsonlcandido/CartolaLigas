@@ -1,4 +1,4 @@
-using CartolaLigas.DTOs;
+using CartolaLigas.Models;
 using CartolaLigas.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -42,7 +42,7 @@ namespace CartolaLigas.Providers
                     try
                     {
                         // Obter o UserDTO a partir do id
-                        var userResponse = await _httpClient.GetFromJsonAsync<UserDTO>($"api/collections/users/records/{userId}");
+                        var userResponse = await _httpClient.GetFromJsonAsync<User>($"api/collections/users/records/{userId}");
 
                         if (userResponse != null)
                         {
