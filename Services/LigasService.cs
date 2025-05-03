@@ -1,6 +1,8 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
-using CartolaLigas.Extensions;
+using CartolaLigas.DTOs.Request;
+using CartolaLigas.DTOs.Response;
+using CartolaLigas.Models;
 using CartolaLigas.Providers;
 using Microsoft.JSInterop;
 
@@ -12,11 +14,14 @@ namespace CartolaLigas.Services
         private readonly IJSRuntime _jSRuntime;
         private List<Liga>? _cachedLigas; // Cache em memória para as ligas
         private Liga _cachedLiga;
+        private TimeService _timeService;
+        private List<Models.Time> _times;
 
-        public LigasService(HttpClient httpClient, IJSRuntime jSRuntime)
+        public LigasService(HttpClient httpClient, IJSRuntime jSRuntime, TimeService timeService)
         {
             _httpClient = httpClient;
             _jSRuntime = jSRuntime;
+            _timeService = timeService;
         }
 
         public async Task<Liga> CreateAsync(string name, string? token = null)
@@ -66,7 +71,7 @@ namespace CartolaLigas.Services
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
 
-            var response = await _httpClient.GetFromJsonAsync<ListarLigas>("https://api.ligas.ehtudo.app/webhook/ligas/v1/liga/");
+            var response = await _httpClient.GetFromJsonAsync<ListarLigasResponse>("https://api.ligas.ehtudo.app/webhook/ligas/v1/liga/");
             if (response == null)
             {
                 Console.WriteLine("Erro ao listar ligas");
@@ -111,64 +116,47 @@ namespace CartolaLigas.Services
             _cachedLiga = response;
             return _cachedLiga;
         }
-    }
-
-        
-
-    internal class CreateLeagueRequest
-    {
-        public string name { get; set; }
-
-        public string slug { get
-            {
-                return name.ToSlug();
-            }
+        public async Task<List<Models.Time>> TeamsOnLeague()
+        {
+            _httpClient.DefaultRequestHeaders.Clear();
+            throw new NotImplementedException("O método TeamsOnLeague ainda não foi implementado.");
         }
-    }
 
-    //"page": 1,
-    //"perPage": 30,
-    //"totalPages": 1,
-    //"totalItems": 2,
-    //"items": [
-    //  {
-    //    "collectionId": "pbc_4026191094",
-    //    "collectionName": "ligas",
-    //    "id": "test",
-    //    "user_id": "RELATION_RECORD_ID",
-    //    "name": "test",
-    //    "slug": "test",
-    //    "created": "2022-01-01 10:00:00.123Z",
-    //    "updated": "2022-01-01 10:00:00.123Z"
-    //  },
-    //  {
-    //  "collectionId": "pbc_4026191094",
-    //    "collectionName": "ligas",
-    //    "id": "[object Object]2",
-    //    "user_id": "RELATION_RECORD_ID",
-    //    "name": "test",
-    //    "slug": "test",
-    //    "created": "2022-01-01 10:00:00.123Z",
-    //    "updated": "2022-01-01 10:00:00.123Z"
-    //  }
-    //]
-    public class ListarLigas
-    {
-        public int page { get; set; }
-        public int perPage { get; set; }
-        public int totalPages { get; set; }
-        public int totalItems { get; set; }
-        public List<Liga> items { get; set; }
-    }
-    public class Liga
-    {
-        public string collectionId { get; set; }
-        public string collectionName { get; set; }
-        public string id { get; set; }
-        public string user_id { get; set; }
-        public string name { get; set; }
-        public string slug { get; set; }
-        public string created { get; set; }
-        public string updated { get; set; }
+
+        public async Task<bool> AddTeamToLeague(Models.Cartola.Time cartolaTime, string leagueId)
+        {
+            // Converter Cartola.Time para Models.Time  
+            var time = new Models.Time
+            {
+                Name = cartolaTime.Nome,
+                NomeCartola = cartolaTime.NomeCartola,
+                CartolaTimeId = cartolaTime.TimeId
+            };
+
+            // Adicionar o time usando TimeService  
+            var addedTime = await _timeService.AddTime(time);
+            if (addedTime == null)
+            {
+                Console.WriteLine("Erro ao adicionar o time.");
+                return false;
+            }
+
+            // Vincular o time à liga  
+            var payload = new
+            {
+                liga_id = leagueId,
+                time_id = addedTime.Id
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("https://api.ligas.ehtudo.app/api/collections/ligas_times/records", payload);
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Time vinculado à liga com sucesso.");
+                return true;
+            }
+
+            Console.WriteLine("Erro ao vincular o time à liga.");
+            return false;
+        }
     }
 }

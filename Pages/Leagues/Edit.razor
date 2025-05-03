@@ -1,73 +1,76 @@
-﻿@page "/leagues/edit/{leagueId}"
-@using CartolaLigas.Services
-@using CartolaLigas.Shared
-@using CartolaLigas.Models
-@inject LigasService LigasServices
+﻿@page "/leagues/edit/{leagueId}"  
+@using Microsoft.AspNetCore.Authorization  
+@using CartolaLigas.Services  
+@using CartolaLigas.Shared  
+@using CartolaLigas.Models  
+@inject LigasService LigasServices  
+@attribute [Authorize(Roles = "admin,user")]
 
-@if (isLoading)
-{
-	<p>Carregando ...</p>
-}else{
-<h3>Times na liga "@liga.name"</h3>
+@if (isLoading)  
+{  
+	<p>Carregando ...</p>  
+}  
+else  
+{  
+	<h3>Times na liga "@liga.name"</h3>  
 
-<div class="container">
-	<div class="row">
-		<div class="col-md-8">
-			<TeamsInLeague TimesDaLiga="@times" />
-			<button class="btn btn-primary" @onclick="AbrirModalAdicionarTime">Adicionar Time</button>
-		</div>
-	</div>
+	<div class="container">  
+		<div class="row">  
+			<div class="col-md-8">  
+				<TeamsInLeague TimesDaLiga="@timesNaLiga" />  
+				<button class="btn btn-primary" @onclick="AbrirModalAdicionarTime">Adicionar Time</button>  
+			</div>  
+		</div>  
 
-	<ModalAddTeamToLeague MostrarModal="@mostrarModalAdicionarTime"
-						FecharModal="FecharModalAdicionarTime"/>
-</div>
-}
-
+		<ModalAddTeamToLeague MostrarModal="@mostrarModalAdicionarTime"  
+		FecharModal="FecharModalAdicionarTime"  
+		OnTeamSelected="AdicionarTimeALiga" />  
+	</div>  
+}  
 
 @code {
-	[Parameter]
-	public string leagueId { get; set; }
+	[Parameter]  
+	public string? leagueId { get; set; }  
 
-	private bool isLoading = true;
+	private bool isLoading = true;  
 
-	private Liga liga { get; set; }
+	private Liga? liga { get; set; }  
 
-	private List<Time> timesNaLiga = new List<Models.Time>();
-	private List<Time> times;
+	private List<Time> timesNaLiga = new List<Models.Time>();  
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnInitializedAsync()  
+	{  
+		try  
+		{  
+			liga = await LigasServices.LigaAsync(leagueId);  
+			timesNaLiga = new List<Models.Time>()  
+			{  
+				new Models.Time { Name = "Time A", NomeCartola = "Cartola 1" },  
+				new Models.Time { Name = "Time B", NomeCartola = "Cartola 2" },  
+				new Models.Time { Name = "Time C", NomeCartola = "Cartola 3" }  
+				// ... mais times  
+			};  
+		}  
+		finally  
+		{  
+			isLoading = false;  
+		}  
+	}  
+
+	private bool mostrarModalAdicionarTime = false;  
+
+	private void AbrirModalAdicionarTime()  
+	{  
+		mostrarModalAdicionarTime = true;  
+	}  
+
+	private void FecharModalAdicionarTime()  
+	{  
+		mostrarModalAdicionarTime = false;  
+	}  
+
+	private async Task AdicionarTimeALiga(Models.Cartola.Time timeSelecionadoCartola)  
 	{
-		try
-		{
-			liga = await LigasServices.LigaAsync(leagueId);
-			times = new List<Models.Time>()
-				{
-					new Models.Time { Name = "Time A", NomeCartola = "Cartola 1" },
-					new Models.Time { Name = "Time B", NomeCartola = "Cartola 2" },
-					new Models.Time { Name = "Time C", NomeCartola = "Cartola 3" }
-					// ... mais times
-				};
-		}
-		finally
-		{
-			isLoading = false;
-		}
-	}
-
-	private bool mostrarModalAdicionarTime = false;
-
-	private void AbrirModalAdicionarTime()
-	{
-		mostrarModalAdicionarTime = true;
-	}
-
-	private void FecharModalAdicionarTime()
-	{
-		mostrarModalAdicionarTime = false;
-	}
-
-	private void AdicionarTimeALiga(Models.Time time)
-	{
-
-	}
+		await LigasServices.AddTeamToLeague(timeSelecionadoCartola, leagueId); 
+	}  
 }

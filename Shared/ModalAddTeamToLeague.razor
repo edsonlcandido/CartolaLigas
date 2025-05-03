@@ -1,19 +1,65 @@
 ﻿@inject TimeService TimeService
 @inject MercadoService MercadoService
+@using CartolaLigas.Models.Cartola
+
 @if (MostrarModal)
 {
-    <div class="modal fade show" tabindex="-1" style="display: block;" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Adicionar Time à Liga</h5>
-                    <button type="button" class="btn-close" @onclick="FecharModal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" @onclick="FecharModalInterno" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <input @bind="searchQuery" @bind:event="oninput" class="form-control" placeholder="Digite o nome do time" />
+                        <button class="btn btn-primary" @onclick="SearchTeams">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
 
+                    @if (isSearching)
+                    {
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <p>Pesquisando times...</p>
+                        </div>
+                    }
+
+                    @if (teams != null)
+                    {
+                        @if (teams.Count == 0 || (teams.Count > 0 && teams[0].Nome == null)) // Verificação ajustada para evitar erro se teams[0] for acessado quando count é 0
+                        {
+                            <div class="d-flex flex-column align-items-center">
+                                <p>@errorMessage</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column align-items-center">
+                                @if (MercadoService.IsEmManutencao())
+                                {
+                                    <p>Mercado em manutenção</p>
+                                }
+                                @foreach (var team in teams.Where(t => t.Nome != null)) // Garante que apenas times válidos sejam exibidos
+                                {
+                                    <TeamCard Team="@team">
+                                        <ActionTemplate>
+                                            <button class="btn btn-success btn-sm" @onclick="() => SelectTeam(team)">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </ActionTemplate>
+                                    </TeamCard>
+                                }
+                            </div>
+                        }
+                    }
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="FecharModal">Cancelar</button>
+                    <button type="button" class="btn btn-secondary" @onclick="FecharModalInterno">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -27,6 +73,65 @@
     [Parameter]
     public EventCallback FecharModal { get; set; }
 
-    private string termoPesquisa = "";
+    [Parameter]
+    public EventCallback<Time> OnTeamSelected { get; set; }
 
+    private string searchQuery = "";
+    private List<Time>? teams;
+    private bool isSearching = false;
+    private string? errorMessage = null;
+
+    private string termoPesquisa = "";
+    private async Task SearchTeams()
+    {
+        teams = null; // Limpa resultados anteriores
+        errorMessage = null;
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            errorMessage = "Digite um nome para pesquisar.";
+            StateHasChanged();
+            return;
+        }
+
+        isSearching = true;
+        StateHasChanged();
+
+        try
+        {
+            teams = await TimeService.SearchTeams(searchQuery, !MercadoService.IsEmManutencao());
+            // Ajuste na verificação: Checa se a lista é nula, vazia, ou se o primeiro item (se existir) tem nome nulo
+            if (teams == null || !teams.Any(t => t.Nome != null))
+            {
+                errorMessage = "Nenhum time encontrado";
+                teams = new List<Time>(); // Garante que teams não seja nulo para a UI
+            }
+        }
+        catch (Exception ex)
+        {
+            // Logar a exceção se necessário
+            errorMessage = $"Erro ao buscar times: {ex.Message}";
+            teams = new List<Time>(); // Garante que teams não seja nulo para a UI
+        }
+        finally
+        {
+            isSearching = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SelectTeam(Time team)
+    {
+        await OnTeamSelected.InvokeAsync(team);
+        await FecharModalInterno(); // Fecha o modal após a seleção
+    }
+
+    private async Task FecharModalInterno()
+    {
+        // Reseta o estado ao fechar
+        searchQuery = "";
+        teams = null;
+        isSearching = false;
+        errorMessage = null;
+        await FecharModal.InvokeAsync();
+    }
 }
