@@ -116,10 +116,37 @@ namespace CartolaLigas.Services
             _cachedLiga = response;
             return _cachedLiga;
         }
-        public async Task<List<Models.Time>> TeamsOnLeague()
+        public async Task<List<Models.Time>> TeamsOnLeague(string ligaId)
         {
-            _httpClient.DefaultRequestHeaders.Clear();
-            throw new NotImplementedException("O método TeamsOnLeague ainda não foi implementado.");
+            try
+            {
+                // Fazer a requisição para obter os times da liga
+                var response = await _httpClient.GetFromJsonAsync<LigaTimesResponse>($"https://api.ligas.ehtudo.app/api/collections/ligas_times/records?filter=(liga_id='{ligaId}')");
+
+                if (response == null || response.Items == null || response.Items.Count == 0)
+                {
+                    Console.WriteLine("Nenhum time encontrado para a liga.");
+                    return new List<Models.Time>();
+                }
+
+                // Buscar os detalhes de cada time usando o TimeService
+                var times = new List<Models.Time>();
+                foreach (var ligaTime in response.Items)
+                {
+                    var time = await _timeService.GetTime(ligaTime.TimeId);
+                    if (time != null)
+                    {
+                        times.Add(time);
+                    }
+                }
+
+                return times;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao listar os times da liga {ligaId}: {ex.Message}");
+                return new List<Models.Time>();
+            }
         }
 
 

@@ -165,6 +165,21 @@ namespace CartolaLigas.Services
         {
             _cachedTeam = null; // Limpar o cache quando necessário
         }
+        public async Task<Models.Time> GetTime(string timeId)
+        {
+            try
+            {
+                var time = await _httpClient.GetFromJsonAsync<Models.Time>($"https://api.ligas.ehtudo.app/api/collections/times/records/{timeId}");
+                return time;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao buscar o time com ID {timeId}: {ex.Message}");
+                return null;
+            }
+        }
+
+
 
         private async Task adicionarPontuacaoTime()
         {

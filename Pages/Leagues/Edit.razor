@@ -43,13 +43,14 @@ else
 		try  
 		{  
 			liga = await LigasServices.LigaAsync(leagueId);  
-			timesNaLiga = new List<Models.Time>()  
-			{  
-				new Models.Time { Name = "Time A", NomeCartola = "Cartola 1" },  
-				new Models.Time { Name = "Time B", NomeCartola = "Cartola 2" },  
-				new Models.Time { Name = "Time C", NomeCartola = "Cartola 3" }  
-				// ... mais times  
-			};  
+			// timesNaLiga = new List<Models.Time>()  
+			// {  
+			// 	new Models.Time { Name = "Time A", NomeCartola = "Cartola 1" },  
+			// 	new Models.Time { Name = "Time B", NomeCartola = "Cartola 2" },  
+			// 	new Models.Time { Name = "Time C", NomeCartola = "Cartola 3" }  
+			// 	// ... mais times  
+			// };  
+			timesNaLiga = await LigasServices.TeamsOnLeague(leagueId);
 		}  
 		finally  
 		{  
@@ -72,5 +73,7 @@ else
 	private async Task AdicionarTimeALiga(Models.Cartola.Time timeSelecionadoCartola)  
 	{
 		await LigasServices.AddTeamToLeague(timeSelecionadoCartola, leagueId); 
+		timesNaLiga = await LigasServices.TeamsOnLeague(leagueId);
+		StateHasChanged();
 	}  
 }
