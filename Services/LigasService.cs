@@ -120,6 +120,8 @@ namespace CartolaLigas.Services
         {
             try
             {
+                _httpClient.DefaultRequestHeaders.Clear();
+
                 // Fazer a requisição para obter os times da liga
                 var response = await _httpClient.GetFromJsonAsync<LigaTimesResponse>($"https://api.ligas.ehtudo.app/api/collections/ligas_times/records?filter=(liga_id='{ligaId}')");
 
@@ -150,14 +152,17 @@ namespace CartolaLigas.Services
         }
 
 
-        public async Task<bool> AddTeamToLeague(Models.Cartola.Time cartolaTime, string leagueId)
+        public async Task<bool> AddTeamToLeague(Models.Cartola.Time cartolaTime, string leagueId, string? token = null)
         {
+            // Obter o token de autenticação
+            var authToken = token ?? await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
             // Converter Cartola.Time para Models.Time  
             var time = new Models.Time
             {
                 Name = cartolaTime.Nome,
                 NomeCartola = cartolaTime.NomeCartola,
-                CartolaTimeId = cartolaTime.TimeId
+                CartolaTimeId = cartolaTime.TimeId,
+                Slug = cartolaTime.Slug
             };
 
             // Adicionar o time usando TimeService  
@@ -175,6 +180,10 @@ namespace CartolaLigas.Services
                 time_id = addedTime.Id
             };
 
+            // Configurar o header de autorização
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
+
             var response = await _httpClient.PostAsJsonAsync("https://api.ligas.ehtudo.app/api/collections/ligas_times/records", payload);
             if (response.IsSuccessStatusCode)
             {
@@ -185,5 +194,49 @@ namespace CartolaLigas.Services
             Console.WriteLine("Erro ao vincular o time à liga.");
             return false;
         }
+
+        public async Task<bool> RemoverTimeDaLiga(string timeId, string ligaId, string? token = null)
+        {
+            try
+            {
+                // Obter o token de autenticação
+                var authToken = token ?? await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+
+                // Configurar o header de autorização
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
+
+                // Buscar o objeto LigaTime correspondente ao timeId e ligaId
+                var response = await _httpClient.GetFromJsonAsync<LigaTimesResponse>(
+                    $"https://api.ligas.ehtudo.app/api/collections/ligas_times/records?filter=(time_id='{timeId}')&filter=(liga_id='{ligaId}')");
+
+                if (response == null || response.Items == null || response.Items.Count == 0)
+                {
+                    Console.WriteLine("Nenhum registro encontrado para o time na liga.");
+                    return false;
+                }
+
+                // Obter o ID do registro
+                var ligaTimeId = response.Items.First().Id;
+
+                // Realizar a requisição DELETE
+                var deleteResponse = await _httpClient.DeleteAsync($"https://api.ligas.ehtudo.app/api/collections/ligas_times/records/{ligaTimeId}");
+
+                if (deleteResponse.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Time removido da liga com sucesso.");
+                    return true;
+                }
+
+                Console.WriteLine("Erro ao remover o time da liga.");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao remover o time da liga: {ex.Message}");
+                return false;
+            }
+        }
+
     }
 }

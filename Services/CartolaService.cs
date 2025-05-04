@@ -20,6 +20,5 @@ namespace CartolaLigas.Services
             var response = await _httpClient.GetFromJsonAsync<Object>("mercado/");
             return response;
         }
-
     }
 }

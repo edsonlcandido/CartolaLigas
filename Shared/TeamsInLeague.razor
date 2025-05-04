@@ -4,6 +4,7 @@
         <tr>
             <th>Nome do Time</th>
             <th>Nome do Cartola</th>
+            <th>Ações</th>
         </tr>
     </thead>
     <tbody>
@@ -12,6 +13,11 @@
             <tr>
                 <td>@time.Name</td>
                 <td>@time.NomeCartola</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" @onclick="() => RemoverTime(time)">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
             </tr>
         }
     </tbody>
@@ -20,4 +26,26 @@
 @code {
     [Parameter]
     public List<CartolaLigas.Models.Time> TimesDaLiga { get; set; }
+    [Parameter]
+	public string LeagueId { get; set; }
+
+    [Inject]
+    private LigasService LigasService { get; set; }
+
+    private async Task RemoverTime(CartolaLigas.Models.Time time)
+    {
+        var ligaId = LeagueId; // Substitua pelo ID da liga correspondente
+        var sucesso = await LigasService.RemoverTimeDaLiga(time.Id, ligaId);
+
+        if (sucesso)
+        {
+            // Remover o time da lista local
+            TimesDaLiga.Remove(time);
+            StateHasChanged();
+        }
+        else
+        {
+            Console.WriteLine("Erro ao remover o time da liga.");
+        }
+    }
 }
