@@ -21,7 +21,7 @@
   - Webhooks personalizados
 
 ### Frontend
-- [A definir - Recomendação: SPA com React/Vue e TypeScript]
+- Blazor webAssembly
 - Cliente HTTP para comunicação com endpoints do N8N
 - Interface responsiva para desktop e mobile
 
@@ -139,12 +139,10 @@
 
 #### Ligas
 - **ligas**: Ligas criadas pelos usuários
-- **ligas_duplicate**: Versão estendida com relações (usado para testes)
 - **ligas_times**: Tabela de junção entre ligas e times
 
 #### Times
 - **times**: Times dos usuários com IDs do Cartola FC
-- **times_duplicate**: Versão estendida com relações (usado para testes)
 - **times_pontuacao**: Pontuações dos times por rodada
 
 #### Sistema de Processamento
